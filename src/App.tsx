@@ -6,20 +6,33 @@ import Error from "./pages/Error/Error";
 import { Private } from "./pages/Dashboard/Private";
 import { PrivateRoutes, PublicRoutes } from "./models/routes";
 import AuthGuard from "./guards/auth.guard";
+import { RoutesWithNotFound } from "./utilities";
+import { Suspense } from "react";
+import store from "./redux/store";
+import { Provider } from "react-redux";
 
 function App(): JSX.Element {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to={PrivateRoutes.PRIVATE} />} />
-          <Route path="*" element={<Error />} />
-          <Route path={PublicRoutes.LOGIN} element={<Login />} />
-          <Route element={<AuthGuard />}>
-            <Route path={`${PrivateRoutes.PRIVATE}/*`} element={<Private />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <Suspense fallback={<>Cargando...</>}>
+        <Provider store={store}>
+          <BrowserRouter>
+            <RoutesWithNotFound>
+              <Route
+                path="/"
+                element={<Navigate to={PrivateRoutes.PRIVATE} />}
+              />
+              <Route path={PublicRoutes.LOGIN} element={<Login />} />
+              <Route element={<AuthGuard />}>
+                <Route
+                  path={`${PrivateRoutes.PRIVATE}/*`}
+                  element={<Private />}
+                />
+              </Route>
+            </RoutesWithNotFound>
+          </BrowserRouter>
+        </Provider>
+      </Suspense>
     </div>
   );
 }
