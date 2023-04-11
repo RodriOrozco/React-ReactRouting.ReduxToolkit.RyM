@@ -1,15 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { getMorty } from "../../services";
 import { useDispatch } from "react-redux";
-import { createUser } from "../../redux/states/user";
+import { createUser, resetUser, userKey } from "../../redux/states/user";
+import { useNavigate } from "react-router-dom";
+import { PrivateRoutes, PublicRoutes } from "../../models/routes";
+import { clearPersistUserInfo } from "../../utilities/localStorage.utility";
 
 const Login = () => {
-  const login = async () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    clearPersistUserInfo(userKey);
+    dispatch(resetUser());
+    navigate(`/${PublicRoutes.LOGIN}`, { replace: true });
+  }, []);
+
+  const loginUser = async () => {
     try {
       const response = await getMorty();
       dispatch(createUser(response));
+      navigate(`/${PrivateRoutes.PRIVATE}`, { replace: true });
     } catch (error) {
       console.log(error);
     }
@@ -17,7 +28,8 @@ const Login = () => {
 
   return (
     <div>
-      <h1>login</h1>
+      <h1>Logeate bro</h1>
+      <button onClick={loginUser}>Log In</button>
     </div>
   );
 };

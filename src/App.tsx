@@ -1,15 +1,16 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
+import { Suspense, lazy } from "react";
+import { Provider } from "react-redux";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
-import Login from "./pages/Login/Login";
-import Error from "./pages/Error/Error";
-import { Private } from "./pages/Dashboard/Private";
-import { PrivateRoutes, PublicRoutes } from "./models/routes";
+import store from "./redux/store";
 import AuthGuard from "./guards/auth.guard";
 import { RoutesWithNotFound } from "./utilities";
-import { Suspense } from "react";
-import store from "./redux/store";
-import { Provider } from "react-redux";
+import { PrivateRoutes, PublicRoutes } from "./models/routes";
+import LogOut from "./components/LogOut/LogOut";
+
+const Login = lazy(() => import("./pages/Login/Login"));
+const Private = lazy(() => import("./pages/Dashboard/Private"));
 
 function App(): JSX.Element {
   return (
@@ -17,13 +18,14 @@ function App(): JSX.Element {
       <Suspense fallback={<>Cargando...</>}>
         <Provider store={store}>
           <BrowserRouter>
+            <LogOut />
             <RoutesWithNotFound>
               <Route
                 path="/"
                 element={<Navigate to={PrivateRoutes.PRIVATE} />}
               />
               <Route path={PublicRoutes.LOGIN} element={<Login />} />
-              <Route element={<AuthGuard />}>
+              <Route element={<AuthGuard privateValidation={true} />}>
                 <Route
                   path={`${PrivateRoutes.PRIVATE}/*`}
                   element={<Private />}
